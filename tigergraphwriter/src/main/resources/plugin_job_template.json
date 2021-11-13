@@ -1,0 +1,18 @@
+{
+    "name": "tigergraphwriter",
+    "parameter": {
+        "username": "root",
+        "password": "123456",
+        "token": "tokenKey",
+        "jdbcUrl": "jdbc:tg:http://192.168.100.21:14240",
+        "writeMode": "insert",
+        "graph": "test_con",
+        "table": [
+            "job loadPeople1",
+            "job loadPeople2"
+        ],
+        "sep": ",",
+        "filename": "f",
+        "eol": "\n"
+    }
+}

@@ -1,0 +1,75 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                "byte":10485760
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "gcsreader",
+                    "parameter": {
+                        "credentials": "/home/ubuntu/gcs/key/gcs2tg-0e3531a0b06c.json",
+                        "bucketName": "tgtest",
+                        "objectName": ["user.csv","test500m.csv"],
+                        "column" : [
+                            {
+                                "index": "0",
+                                "type": "string"
+                            },
+                            {
+                                "index": "1",
+                                "type": "string"
+                            },
+                            {
+                                "index": "2",
+                                "type": "string"
+                            },
+                            {
+                                "index": "3",
+                                "type": "string"
+                            },
+                            {
+                                "index": "4",
+                                "type": "string"
+                            },
+                            {
+                                "index": "5",
+                                "type": "string"
+                            },
+                            {
+                                "index": "6",
+                                "type": "string"
+                            }
+                        ],
+                        "fileType": "csv",
+                        "encoding": "UTF-8",
+                        "fieldDelimiter": ",",
+                        "skipHeader": false
+                    }
+                },
+                "writer": {
+                    "name": "streamwriter",
+                    "parameter": {
+                        "print": false,
+                        "encoding": "UTF-8"
+                    }
+                }
+            }
+        ]
+    },
+    "core": {
+        "transport": {
+            "channel": {
+                "speed": {
+                    "byte": 1048576
+                }
+            }
+        }
+    }
+}

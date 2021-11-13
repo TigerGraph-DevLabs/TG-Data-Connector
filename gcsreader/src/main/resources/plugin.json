@@ -1,0 +1,6 @@
+{
+    "name": "gcsreader",
+    "class": "com.alibaba.datax.plugin.reader.gcsreader.GcsReader",
+    "description": "use to connect gcs,read file by BufferedReader.",
+    "developer": "alibaba"
+}

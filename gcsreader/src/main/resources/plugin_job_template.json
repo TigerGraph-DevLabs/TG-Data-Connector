@@ -1,0 +1,13 @@
+{
+    "name": "gcsreader",
+    "parameter": {
+        "credentials": "/home/ubuntu/gcs/key/gcs2tg-0e3531a0b06c.json",
+        "bucketName": "tgtest",
+        "objectName": ["user.csv","test500m.csv"],
+        "columnIndex" : [1,2,3,4],
+        "fileType": "csv",
+        "encoding": "UTF-8",
+        "fieldDelimiter": ",",
+        "skipHeader": false
+    }
+}
