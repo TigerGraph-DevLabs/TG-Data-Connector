@@ -46,8 +46,8 @@
         <module>transformer</module>
 
         <!-- reader -->
-<!--        <module>mysqlreader</module>-->
-<!--        <module>sqlserverreader</module>-->
+        <module>mysqlreader</module>
+        <module>sqlserverreader</module>
 <!--        <module>oraclereader</module>-->
         <module>gcsreader</module>
 
