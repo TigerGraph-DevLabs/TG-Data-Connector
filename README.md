@@ -4,10 +4,11 @@ Connector based on Datax.
 # DataX Introduction
 ##### Reference：[DataX-Introduction](https://github.com/alibaba/DataX/blob/master/introduction.md)
 
-# Development environment
-Java 8+
-Maven 3.5.4+
-Python 2|3, both supported
+# System Requirements
+- Linux
+- Java 8+
+- Maven 3.5.4+
+- Python 2.6.x| Python 3.x, both supported
 
 # Package
 Download source code then running following command.
@@ -27,14 +28,24 @@ mvn clean package -DskipTests assembly:assembly
 
 # Execute job 
 ### python 2 : 
-cd ~/datax/bin
-python datax.py ../job/job.json
+    ``` shell
+    $ cd  {YOUR_DATAX_HOME}/bin
+    $ python datax.py {YOUR_JOB.json}
+    ```
 ### python 3 :
-cd ~datax/bin/python3
-python datax.py ../../job/job.json
+    ``` shell
+    $ cd  {YOUR_DATAX_HOME}/bin/python3
+    $ python datax.py {YOUR_JOB.json}
+    ```
 
 # Config job
 Reference to resources/plugin_job_template.json in each reader or writer.
+ * [Mysql Reader Job Config](https://github.com/TigerGraph-DevLabs/TG-Data-Connector/blob/main/mysqlreader/doc/mysqlreader.md)
+ * [Oracle Reader Job Config](https://github.com/TigerGraph-DevLabs/TG-Data-Connector/blob/main/oraclereader/doc/oraclereader.md)
+ * [SqlServer Reader Job Config](https://github.com/TigerGraph-DevLabs/TG-Data-Connector/blob/main/sqlserverreader/doc/sqlserverreader.md)
+ * [GCS Reader Job Config](https://github.com/TigerGraph-DevLabs/TG-Data-Connector/blob/main/gcsreader/doc/gcsreader.md)
+ * [TigerGraph Writer Job Config](https://github.com/TigerGraph-DevLabs/TG-Data-Connector/blob/main/tigergraphwriter/doc/tigergraphwriter.md)
+ 
 [Job Examples](https://github.com/TigerGraph-DevLabs/TG-Data-Connector/tree/main/core/src/main/job)
 
 # Oracle Reader

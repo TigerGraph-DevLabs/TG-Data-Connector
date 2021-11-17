@@ -11,7 +11,7 @@ Authenticating as a service account,details ref: https://cloud.google.com/docs/a
 
 ## 3 Configuration instructions
 
-* Configure a job that synchronizes and extracts data from the Gcs database to the local.
+* Configure a job that synchronizes and extracts data from the GCS to the local, print on screen.
 ```
 {
     "job": {

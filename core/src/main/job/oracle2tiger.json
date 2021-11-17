@@ -29,11 +29,20 @@
           }
         },
         "writer": {
-          "name": "txtfilewriter",
+          "name": "tigergraphwriter",
           "parameter": {
-            "path": "/root",
-            "fileName": "test",
-            "writeMode": "append"
+            "username": "root",
+            "password": "123456",
+            "token": "tokenKey",
+            "jdbcUrl": "jdbc:tg:http://192.168.100.21:14240",
+            "writeMode": "insert",
+            "graph": "test_con",
+            "table": [
+              "job test"
+            ],
+            "sep": ",",
+            "filename": "f",
+            "eol": "\n"
           }
         }
       }
