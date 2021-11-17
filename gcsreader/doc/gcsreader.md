@@ -2,7 +2,7 @@
 # GCSReader introduction
 
 ## 1 Brief
-Support csv、text
+Support csv、txt
 GCSReader read data from Google Cloud Storage by using java client which connect Google Cloud Storage remotely.
 
 
