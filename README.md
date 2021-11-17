@@ -16,15 +16,15 @@ Download source code then running following command.
 mvn clean package -DskipTests assembly:assembly 
 ```
 ## Package structure
-├── datax
-│   ├── bin
-│   ├── conf
-│   ├── job
-│   ├── lib
-│   ├── log
-│   ├── log_perf
-│   ├── plugin
-│   └── script
+├── datax <br />
+│   ├── bin <br />
+│   ├── conf <br />
+│   ├── job <br />
+│   ├── lib <br />
+│   ├── log <br />
+│   ├── log_perf <br />
+│   ├── plugin <br />
+│   └── script <br />
 
 # Execute job 
 ### python 2 : 
