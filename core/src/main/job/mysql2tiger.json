@@ -38,9 +38,9 @@
 					"jdbcUrl": "jdbc:tg:http://localhost:14240",
                     "writeMode": "insert",
                     "graph": "test_con",
-                    "table": "job loadPeople3",
-					"sep": ",",
-					"filename": "f",
+                    "table": ["job loadJob","job loadJob"],
+                    "sep": ",",
+                    "filename": ["user","test"],
 					"eol": "\n"
                   }
                 }

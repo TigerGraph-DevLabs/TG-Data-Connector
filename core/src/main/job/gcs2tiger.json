@@ -17,7 +17,7 @@
                         "credentials": "/home/ubuntu/gcs/key/gcs2tg-0e3531a0b06c.json",
                         "bucketName": "tgtest",
                         "objectName": ["user.csv","test500m.csv"],
-                        "columnIndex" : [1,2,3,4],
+                        "columnIndex" :["1,2,3,4","1,3,5"],
                         "fileType": "csv",
                         "encoding": "UTF-8",
                         "fieldDelimiter": ",",
@@ -32,9 +32,9 @@
                         "jdbcUrl": "jdbc:tg:http://127.0.0.1:14240",
                         "writeMode": "insert",
                         "graph": "Social_network",
-                        "table": ["job loadUser","job loadUser"],
+                        "table": ["job loadJob","job loadJob"],
                         "sep": ",",
-                        "filename": "user",
+                        "filename": ["user","test"],
                         "eol": "\n"
                     }
                 }

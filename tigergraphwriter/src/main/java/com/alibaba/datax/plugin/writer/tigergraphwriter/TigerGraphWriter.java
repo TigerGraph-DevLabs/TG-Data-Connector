@@ -41,26 +41,23 @@ public class TigerGraphWriter extends Writer {
         public void init() {
             this.originalConfig = super.getPluginJobConf();
             this.commonRdbmsWriterJob = new CommonRdbmsWriter.Job(DATABASE_TYPE);
-            //this.commonRdbmsWriterJob.init(this.originalConfig);
         }
 
-        // 一般来说，是需要推迟到 task 中进行pre 的执行（单表情况例外）
         @Override
         public void prepare() {
-            //实跑先不支持 权限 检验
-            //this.commonRdbmsWriterJob.prepare(this.originalConfig);
         }
 
         @Override
         public List<Configuration> split(int mandatoryNumber) {
-            //List<Configuration> split = this.commonRdbmsWriterJob.split(this.originalConfig, mandatoryNumber);
             List<Configuration> split = new ArrayList<>();
 
             List<Object> tables = this.originalConfig.getList("table");
+            List<Object> files = this.originalConfig.getList(TKey.FILE_NAME);
 
             for (int i = 0; i < mandatoryNumber; i++) {
                 Configuration configuration = this.originalConfig.clone();
                 configuration.set(TKey.TABLE, tables.get(i));
+                configuration.set(TKey.FILE_NAME, files.get(i));
                 split.add(configuration);
             }
 
@@ -126,7 +123,6 @@ public class TigerGraphWriter extends Writer {
         public void init() {
             this.writerSliceConfig = super.getPluginJobConf();
             this.commonRdbmsWriterTask = new CommonRdbmsWriter.Task(DATABASE_TYPE);
-            //this.commonRdbmsWriterTask.init(this.writerSliceConfig);
 
             this.username = writerSliceConfig.getString(TKey.USERNAME);
             this.password = writerSliceConfig.getString(TKey.PASSWORD);
@@ -171,27 +167,18 @@ public class TigerGraphWriter extends Writer {
 
         @Override
         public void prepare() {
-            //this.commonRdbmsWriterTask.prepare(this.writerSliceConfig);
         }
 
         //TODO 改用连接池，确保每次获取的连接都是可用的（注意：连接可能需要每次都初始化其 session）
         public void startWrite(RecordReceiver recordReceiver) {
-
             try (Connection connection = getConnection()) {
                 startWriteWithConnection(recordReceiver, this.writerSliceConfig, connection);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
-            //query = "INSERT INTO job load_pagerank(line) VALUES(?)";
-
-            //this.commonRdbmsWriterTask.startWrite(recordReceiver, this.writerSliceConfig,
-            //        super.getTaskPluginCollector());
         }
 
         private void startWriteWithConnection(RecordReceiver recordReceiver, Configuration taskPluginCollector, Connection connection) {
-            //this.taskPluginCollector = taskPluginCollector;
-
             // 写数据库的SQL语句
             calcWriteRecordSql();
 
@@ -209,10 +196,10 @@ public class TigerGraphWriter extends Writer {
                         bufferBytes = 0;
                     }
                 }
+
                 if (!writeBuffer.isEmpty()) {
                     doBatchInsert(connection, writeBuffer);
                     writeBuffer.clear();
-                    bufferBytes = 0;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -220,7 +207,6 @@ public class TigerGraphWriter extends Writer {
                         DBUtilErrorCode.WRITE_DATA_ERROR, e);
             } finally {
                 writeBuffer.clear();
-                bufferBytes = 0;
                 DBUtil.closeDBResources(null, null, connection);
             }
         }

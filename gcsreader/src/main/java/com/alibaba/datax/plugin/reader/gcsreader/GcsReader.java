@@ -11,7 +11,6 @@ import com.alibaba.datax.plugin.unstructuredstorage.reader.UnstructuredStorageRe
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.csvreader.CsvReader;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ReadChannel;
@@ -21,7 +20,6 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.Lists;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +27,8 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.Channels;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author beichen
@@ -158,21 +156,39 @@ public class GcsReader extends Reader {
         private String encoding = null;
         private String fieldDelimiter = null;
         private String bucketName = null;
-        private List<String> objectNames = null;
-        private List<Integer> indexs = null;
+        private List<String> taskObjectNames = null;
+        private Map<String, List<Integer>> objectIndex = new HashMap<>();
         private Boolean skipHeader = null;
 
         @Override
         public void init() {
             this.taskConfig = super.getPluginJobConf();
             String objString = ((JSONArray) this.taskConfig.get(Key.OBJECT_NAME)).toJSONString();
-            objectNames = JSONObject.parseArray(objString, String.class);
+            taskObjectNames =(List<String>) this.taskConfig.get("sourceFiles");
             this.encoding = (String) this.taskConfig.get(com.alibaba.datax.plugin.unstructuredstorage.reader.Key.ENCODING);
             this.bucketName = (String) this.taskConfig.get(Key.BUCKET_NAME);
             this.fieldDelimiter = (String) this.taskConfig.get(com.alibaba.datax.plugin.unstructuredstorage.reader.Key.FIELD_DELIMITER);
             this.skipHeader = (Boolean) this.taskConfig.get(com.alibaba.datax.plugin.unstructuredstorage.reader.Key.SKIP_HEADER);
             String indexString = ((JSONArray) this.taskConfig.get(Key.COLUMN_INDEX)).toJSONString();
-            this.indexs = JSONObject.parseArray(indexString, Integer.class);
+
+            List<String> objectNames = JSONObject.parseArray(objString, String.class);
+            List<String> indexList = JSONObject.parseArray(indexString, String.class);
+            getObjectReadIndex(objectNames, indexList);
+        }
+
+        private void getObjectReadIndex(List<String> objectNames, List<String> indexList) {
+            LOG.info("-----------Get object read config----------");
+            for (int i=0; i<objectNames.size(); i++) {
+                if (taskObjectNames.contains(objectNames.get(i))) {
+                    String[] split = indexList.get(i).split(",");
+                    List<Integer> indexs = Arrays.stream(split)
+                            .map(s->Integer.parseInt(s.trim()))
+                            .collect(Collectors.toList());
+                    objectIndex.put(objectNames.get(i), indexs);
+                    LOG.info("Read object : " + objectNames.get(i) + ", object index : " + indexs.toString());
+                }
+            }
+            LOG.info("-----------Finish object read config----------");
         }
 
         @Override
@@ -192,14 +208,14 @@ public class GcsReader extends Reader {
         public void startRead(RecordSender recordSender) {
 
             LOG.info("read start");
-            for (String objectName : this.objectNames) {
+            for (String objectName : this.taskObjectNames) {
                 LOG.info(String.format("reading file : [%s]", objectName));
                 ReadChannel reader = storage.reader(this.bucketName, objectName);
 
                 BufferedReader br = new BufferedReader(Channels.newReader(reader, this.encoding));
 
                 doReadFromStream(br, this.taskConfig,
-                        recordSender, this.getTaskPluginCollector());
+                        recordSender, this.getTaskPluginCollector(), objectName);
 
                 if(recordSender != null){
                     recordSender.flush();
@@ -207,6 +223,9 @@ public class GcsReader extends Reader {
 
                 LOG.info(String.format("Finished read file : [%s]", objectName));
 
+                if (reader != null) {
+                    reader.close();
+                }
             }
 
             LOG.info("end read source files...");
@@ -214,7 +233,7 @@ public class GcsReader extends Reader {
         }
 
         public void doReadFromStream(BufferedReader reader, Configuration readerSliceConfig, RecordSender recordSender,
-                                     TaskPluginCollector taskPluginCollector) {
+                                     TaskPluginCollector taskPluginCollector, String objectName) {
 
             if (null != this.fieldDelimiter && 1 != this.fieldDelimiter.length()) {
                 throw DataXException.asDataXException(
@@ -243,7 +262,7 @@ public class GcsReader extends Reader {
 
                 String[] parseRows;
                 while ((parseRows = splitBufferedReader(csvReader)) != null) {
-                    transportOneRecord(recordSender, parseRows, nullFormat, taskPluginCollector);
+                    transportOneRecord(recordSender, parseRows, nullFormat, taskPluginCollector, objectName);
                 }
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
@@ -279,11 +298,13 @@ public class GcsReader extends Reader {
         }
 
         public Record transportOneRecord(RecordSender recordSender, String[] sourceLine,
-                                                String nullFormat, TaskPluginCollector taskPluginCollector) {
+                                                String nullFormat, TaskPluginCollector taskPluginCollector, String objectName) {
             Record record = recordSender.createRecord();
             Column columnGenerated = null;
 
-            if (null ==  this.indexs ||  this.indexs.size() == 0) {
+            List<Integer> indexList = this.objectIndex.get(objectName);
+
+            if (null ==  indexList ||  indexList.size() == 0) {
                 for (String columnValue : sourceLine) {
                     // not equalsIgnoreCase, it's all ok if nullFormat is null
                     if (columnValue.equals(nullFormat)) {
@@ -296,7 +317,7 @@ public class GcsReader extends Reader {
                 recordSender.sendToWriter(record);
             } else {
                 try {
-                    for (Integer index : this.indexs) {
+                    for (Integer index : indexList) {
                         String columnValue = sourceLine[index];
                         columnGenerated = new StringColumn(columnValue);
                         record.addColumn(columnGenerated);
