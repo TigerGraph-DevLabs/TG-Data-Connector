@@ -95,7 +95,7 @@ public class GcsReader extends Reader {
 
                 for(String objectName : this.objectNames) {
                     Blob blob = this.storage.get(BlobId.of((String) readerOriginConfig.get(Key.BUCKET_NAME), objectName));
-                    if(! blob.exists()){
+                    if(! blob.exists()) {
                         String message = "Verify whether blob exists in your GCS";
                         LOG.error(message);
                         throw DataXException.asDataXException(GcsReaderErrorCode.BLOB_NOT_EXIST_ERROR, message);
@@ -173,12 +173,19 @@ public class GcsReader extends Reader {
 
             List<String> objectNames = JSONObject.parseArray(objString, String.class);
             List<String> indexList = JSONObject.parseArray(indexString, String.class);
-            getObjectReadIndex(objectNames, indexList);
+            if (null != indexList && (indexList.size() != 0)) {
+                getObjectReadIndex(objectNames, indexList);
+            }
         }
 
         private void getObjectReadIndex(List<String> objectNames, List<String> indexList) {
             LOG.info("-----------Get object read config----------");
             for (int i=0; i<objectNames.size(); i++) {
+                if (objectNames.size() != indexList.size()) {
+                    LOG.error("Wrong column index config. Object list size must equal column index list size." +
+                            " objectName : " + objectNames +
+                            " columnIndex : " + indexList);
+                }
                 if (taskObjectNames.contains(objectNames.get(i))) {
                     String[] split = indexList.get(i).split(",");
                     List<Integer> indexs = Arrays.stream(split)

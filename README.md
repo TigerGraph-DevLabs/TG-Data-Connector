@@ -9,12 +9,22 @@ Connector based on Datax.
 - Java 8+
 - Maven 3.5.4+
 - Python 2.6.x| Python 3.x, both supported
+- Install tg-java-driver jar to your local maven repository.
+   1. Get tg-java-driver-1.2.jar
+    - Compile the source code https://github.com/tigergraph/ecosys/tree/master/tools/etl/tg-jdbc-driver
+    - Or get it from : [SF2TGconfig](https://github.com/TigerGraph-DevLabs/TG-Snowflake-Connector/tree/main/SF2TGconfig)
+    2. Install  to maven repository
+       ```bash
+       mvn install:install-file -Dfile=/{location}/tg-java-driver-1.2.jar -DgroupId=com.tigergraph -DartifactId=tg-java-driver -Dversion=1.2 -Dpackaging=jar
+       ``` 
+
 
 # Package
 Download source code then running following command.
 ```shell script
 mvn clean package -DskipTests assembly:assembly 
 ```
+
 ## Package structure
 ├── datax <br />
 │   ├── bin <br />
