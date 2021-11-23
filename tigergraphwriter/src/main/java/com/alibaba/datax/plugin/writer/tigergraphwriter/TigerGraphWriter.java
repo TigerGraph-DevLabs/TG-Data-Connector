@@ -235,7 +235,7 @@ public class TigerGraphWriter extends Writer {
                     preparedStatement = Record2StringWriterUtil.filePreparedStatement(preparedStatement,
                             record,
                             dateParse,
-                            "", ',');
+                            "", (Character) this.properties.get(TKey.SEP));
                     preparedStatement.addBatch();
                 }
                 preparedStatement.executeBatch();
