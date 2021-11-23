@@ -24,16 +24,16 @@ public class Record2StringWriterUtil {
                                                           Record record,
                                                           DateFormat dateParse,
                                                           String nullFormat,
-                                                          char separator) throws SQLException {
+                                                          String separator) throws SQLException {
 
         List<String> strings = transportOneRecord(record, nullFormat, dateParse);
-        String parameter = listToString(strings, separator);
+        String parameter = listToString(strings, separator.trim());
         preparedStatement.setString(1, parameter);
 
         return preparedStatement;
     }
 
-    public static String listToString(List list, char separator) {
+    public static String listToString(List list, String separator) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
             sb.append(list.get(i)).append(separator);
