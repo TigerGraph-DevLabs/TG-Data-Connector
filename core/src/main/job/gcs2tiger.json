@@ -16,7 +16,7 @@
                     "parameter": {
                         "credentials": "/home/ubuntu/gcs/key/gcs2tg-0e3531a0b06c.json",
                         "bucketName": "tgtest",
-                        "objectName": ["user.csv","test500m.csv"],
+                        "objectName": ["user.csv","dynamic/Comment/"],
                         "columnIndex" :["1,2,3,4","1,3,5"],
                         "fileType": "csv",
                         "encoding": "UTF-8",

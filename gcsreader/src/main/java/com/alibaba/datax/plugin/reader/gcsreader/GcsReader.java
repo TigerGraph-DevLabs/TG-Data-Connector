@@ -226,21 +226,15 @@ public class GcsReader extends Reader {
                 LOG.info(String.format("reading file : [%s]", objectName));
 
                 // check whether object is a folder
-                Blob blob = this.storage.get(BlobId.of((String) taskConfig.get(Key.BUCKET_NAME), objectName));
-                if(null == blob || (! blob.exists())) {
+                if (objectName.endsWith("/")) {
                     Bucket bucket = this.storage.get((String) taskConfig.get(Key.BUCKET_NAME), Storage.BucketGetOption.fields(Storage.BucketField.values()));
                     Page<Blob> blobs = bucket.list(Storage.BlobListOption.prefix(objectName));
-                    if (null == blobs) {
-                        String message = "Verify whether blob exists in your GCS";
-                        LOG.error(message);
-                        throw DataXException.asDataXException(GcsReaderErrorCode.BLOB_NOT_EXIST_ERROR, message);
-                    } else {
-                        for (Blob b : blobs.iterateAll()) {
-                            LOG.info("read object : " + b.getName());
-                            readFile(recordSender, b.getName());
-                        }
+                    for (Blob b : blobs.iterateAll()) {
+                        LOG.info("read object : " + b.getName());
+                        readFile(recordSender, b.getName());
                     }
                 } else {
+                    Blob blob = this.storage.get(BlobId.of((String) taskConfig.get(Key.BUCKET_NAME), objectName));
                     readFile(recordSender, objectName);
                 }
             }

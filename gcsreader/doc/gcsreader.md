@@ -81,7 +81,8 @@ Authenticating as a service account,details ref: https://cloud.google.com/docs/a
 
 * **objectName**
 
-	* GCS Storage object name. Not null.
+	* GCS Storage object name or gcs folder. Not null.
+	* Folder should be end of '/', such as "dynamic/Comment/"
 	* Multiple files with the same field can be successfully read.
 	* If you use tigergraphwriter, the order of objects corresponds to the order of tables
 
