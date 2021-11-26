@@ -6,18 +6,14 @@ import com.alibaba.datax.common.plugin.RecordSender;
 import com.alibaba.datax.common.plugin.TaskPluginCollector;
 import com.alibaba.datax.common.spi.Reader;
 import com.alibaba.datax.common.util.Configuration;
-import com.alibaba.datax.plugin.unstructuredstorage.reader.ColumnEntry;
 import com.alibaba.datax.plugin.unstructuredstorage.reader.UnstructuredStorageReaderErrorCode;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.csvreader.CsvReader;
+import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.ReadChannel;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
+import com.google.cloud.storage.*;
 import com.google.common.collect.Lists;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
@@ -94,11 +90,21 @@ public class GcsReader extends Reader {
                 this.storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
 
                 for(String objectName : this.objectNames) {
-                    Blob blob = this.storage.get(BlobId.of((String) readerOriginConfig.get(Key.BUCKET_NAME), objectName));
-                    if(! blob.exists()) {
-                        String message = "Verify whether blob exists in your GCS";
-                        LOG.error(message);
-                        throw DataXException.asDataXException(GcsReaderErrorCode.BLOB_NOT_EXIST_ERROR, message);
+                    if (objectName.endsWith("/")) {
+                        Bucket bucket = this.storage.get((String) readerOriginConfig.get(Key.BUCKET_NAME), Storage.BucketGetOption.fields(Storage.BucketField.values()));
+                        Page<Blob> blobs = bucket.list(Storage.BlobListOption.prefix(objectName));
+                        if (null == blobs) {
+                            String message = "Folder not exist in GCS. Folder : " + objectName;
+                            LOG.error(message);
+                            throw DataXException.asDataXException(GcsReaderErrorCode.BLOB_NOT_EXIST_ERROR, message);
+                        }
+                    } else {
+                        Blob blob = this.storage.get(BlobId.of((String) readerOriginConfig.get(Key.BUCKET_NAME), objectName));
+                        if(null == blob || (! blob.exists())) {
+                            String message = "Verify whether blob exists in your GCS. Blob : " + objectName;
+                            LOG.error(message);
+                            throw DataXException.asDataXException(GcsReaderErrorCode.BLOB_NOT_EXIST_ERROR, message);
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -204,6 +210,7 @@ public class GcsReader extends Reader {
                 GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream((String) taskConfig.get("credentials")))
                         .createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
                 this.storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+
             } catch (IOException e) {
                 String message = "Authentication json not exist. Authenticating as a service account refer to : https://cloud.google.com/docs/authentication/production";
                 LOG.error(message);
@@ -217,26 +224,42 @@ public class GcsReader extends Reader {
             LOG.info("read start");
             for (String objectName : this.taskObjectNames) {
                 LOG.info(String.format("reading file : [%s]", objectName));
-                ReadChannel reader = storage.reader(this.bucketName, objectName);
 
-                BufferedReader br = new BufferedReader(Channels.newReader(reader, this.encoding));
-
-                doReadFromStream(br, this.taskConfig,
-                        recordSender, this.getTaskPluginCollector(), objectName);
-
-                if(recordSender != null){
-                    recordSender.flush();
-                }
-
-                LOG.info(String.format("Finished read file : [%s]", objectName));
-
-                if (reader != null) {
-                    reader.close();
+                // check whether object is a folder
+                if (objectName.endsWith("/")) {
+                    Bucket bucket = this.storage.get((String) taskConfig.get(Key.BUCKET_NAME), Storage.BucketGetOption.fields(Storage.BucketField.values()));
+                    Page<Blob> blobs = bucket.list(Storage.BlobListOption.prefix(objectName));
+                    for (Blob b : blobs.iterateAll()) {
+                        LOG.info("read object : " + b.getName());
+                        readFile(recordSender, b.getName());
+                    }
+                } else {
+                    Blob blob = this.storage.get(BlobId.of((String) taskConfig.get(Key.BUCKET_NAME), objectName));
+                    readFile(recordSender, objectName);
                 }
             }
 
             LOG.info("end read source files...");
 
+        }
+
+        private void readFile(RecordSender recordSender, String objectName) {
+            ReadChannel reader = storage.reader(this.bucketName, objectName);
+
+            BufferedReader br = new BufferedReader(Channels.newReader(reader, this.encoding));
+
+            doReadFromStream(br, this.taskConfig,
+                    recordSender, this.getTaskPluginCollector(), objectName);
+
+            if(recordSender != null){
+                recordSender.flush();
+            }
+
+            LOG.info(String.format("Finished read file : [%s]", objectName));
+
+            if (reader != null) {
+                reader.close();
+            }
         }
 
         public void doReadFromStream(BufferedReader reader, Configuration readerSliceConfig, RecordSender recordSender,
@@ -289,19 +312,6 @@ public class GcsReader extends Reader {
                 splitedResult = csvReader.getValues();
             }
             return splitedResult;
-        }
-
-        public static List<ColumnEntry> getListColumnEntry(Configuration configuration) {
-            List<JSONObject> lists = configuration.getList(com.alibaba.datax.plugin.unstructuredstorage.reader.Key.COLUMN, JSONObject.class);
-            if (lists == null) {
-                return null;
-            }
-            List<ColumnEntry> result = new ArrayList<ColumnEntry>();
-            for (final JSONObject object : lists) {
-                result.add(JSON.parseObject(object.toJSONString(),
-                        ColumnEntry.class));
-            }
-            return result;
         }
 
         public Record transportOneRecord(RecordSender recordSender, String[] sourceLine,
