@@ -2,7 +2,7 @@
     "job": {
         "setting": {
             "speed": {
-                "byte":10485760
+                "record":5000
             },
             "errorLimit": {
                 "record": 0,
@@ -30,6 +30,13 @@
                         "username": "tigergraph",
                         "password": "tigergraph",
                         "jdbcUrl": "jdbc:tg:http://127.0.0.1:14240",
+                        "token": "",
+                        "trustStore": "",
+                        "trustStorePassword": "changeit",
+                        "trustStoreType": "JKS",
+                        "keyStore": "",
+                        "keyStorePassword": "changeit",
+                        "keyStoreType": "JKS",
                         "writeMode": "insert",
                         "graph": "Social_network",
                         "table": ["job loadJob","job loadJob"],
