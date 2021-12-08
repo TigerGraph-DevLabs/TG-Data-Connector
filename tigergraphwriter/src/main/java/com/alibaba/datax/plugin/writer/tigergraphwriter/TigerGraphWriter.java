@@ -153,14 +153,26 @@ public class TigerGraphWriter extends Writer {
             String trustStore = writerSliceConfig.getString("trustStore", "");
             String trustStorePassword = writerSliceConfig.getString("trustStorePassword", "");
             String trustStoreType = writerSliceConfig.getString("trustStoreType", "");
-            if (!"".equalsIgnoreCase(trustStore)) {
+            if (!StringUtils.isEmpty(trustStore)) {
                 properties.setProperty("trustStore", trustStore);
             }
-            if (!"".equalsIgnoreCase(trustStorePassword)) {
+            if (!StringUtils.isEmpty(trustStorePassword)) {
                 properties.setProperty("trustStorePassword", trustStorePassword);
             }
-            if (!"".equalsIgnoreCase(trustStoreType)) {
+            if (!StringUtils.isEmpty(trustStoreType)) {
                 properties.setProperty("trustStoreType", trustStoreType);
+            }
+            String keyStore = writerSliceConfig.getString("keyStore", "");
+            String keyStorePassword = writerSliceConfig.getString("keyStorePassword", "");
+            String keyStoreType = writerSliceConfig.getString("keyStoreType", "");
+            if (!StringUtils.isEmpty(keyStore)) {
+                properties.setProperty("keyStore", keyStore);
+            }
+            if (!StringUtils.isEmpty(keyStorePassword)) {
+                properties.setProperty("keyStorePassword", keyStorePassword);
+            }
+            if (!StringUtils.isEmpty(keyStoreType)) {
+                properties.setProperty("keyStoreType", keyStoreType);
             }
 
         }
