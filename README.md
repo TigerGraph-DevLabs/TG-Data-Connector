@@ -58,6 +58,56 @@ Reference to resources/plugin_job_template.json in each reader or writer.
  
 [Job Examples](https://github.com/TigerGraph-DevLabs/TG-Data-Connector/tree/main/core/src/main/job)
 
+## Job params
+Transport speed can be limited by following param.
+* **job.setting.speed.channel**
+	* Datax job concurrent channels.
+	* Default: machine core number . <br />
+
+* **core.transport.channel.speed.byte**
+	* Datax job channel bytes.
+	* Dispensable. <br />
+    * Can replace with core.transport.channel.speed.record. Speed.byte and speed.record cannot coexist.
+
+```json
+{
+    "job": {
+        "setting": {
+            "speed": {
+                "channel": 5
+            },
+            "errorLimit": {
+                "record": 0,
+                "percentage": 0.02
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "",
+                    "parameter": {
+                     }
+                },
+                "writer": {
+                    "name": "",
+                    "parameter": {
+                      }
+                }
+            }
+        ]
+    },
+    "core": {
+        "transport": {
+            "channel": {
+                "speed": {
+                    "byte": 1048576
+                }
+            }
+        }
+    }
+}
+```
+
 # Oracle Reader
 If you need oraclereader, you should add oraclereader module in parent project pom file.
 Then install the right version of ojdbc6 in your local maven repository which defined in oraclereader pom file. 

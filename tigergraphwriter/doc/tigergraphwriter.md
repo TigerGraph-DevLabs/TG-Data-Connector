@@ -69,7 +69,6 @@
 ###  Parameter Description
 
 * **jdbcUrl**
-
 	* tigergraph jdbcurl
  	* Not null <br />
 
@@ -104,4 +103,32 @@
 * **eol**
 	* File eol defined in loading job.
 	* Not null. <br />
+
+#### Support SSL
+* Support SSL by tg-jdbc-driver. [Details](https://github.com/tigergraph/ecosys/tree/master/tools/etl/tg-jdbc-driver)
+  [Encrypting Connections](https://docs.tigergraph.com/tigergraph-server/3.3/security/encrypting-connections)
+
+* **trustStore**
+	* TrustStore file path.
+	* Default null. <br />
+	
+* **trustStorePassword**
+	* TrustStore file password.
+	* Default: "changeit". <br />
+	
+* **trustStoreType**
+	* TrustStore file type.
+	* Default: "JKS". <br />
+
+* **keyStore**
+	* KeyStore file path.
+	* Default null. <br />
+	
+* **keyStorePassword**
+	* KeyStore file password.
+	* Default: "changeit". <br />
+	
+* **keyStoreType**
+	* KeyStore file type.
+	* Default: "JKS". <br />
 
